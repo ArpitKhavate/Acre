@@ -2,17 +2,17 @@
 
 Off-device only. Produces artifacts/disease.onnx + labels/disease.json.
 
-Expects an ImageFolder layout (one subdir per class), e.g. PlantVillage merged
-with PlantDoc:
-
-    data/plantvillage/
-        Tomato___healthy/
-        Tomato___Early_blight/
-        Potato___Late_blight/
-        ...
+Uses the Kaggle "plant-disease-recognition-dataset" (Healthy / Powdery / Rust).
+We export MobileNetV3-Small (not ResNet34 from the notebook) so inference fits
+the Pi 5 CPU budget.
 
 Usage:
-    python train_disease_classifier.py --data data/plantvillage --epochs 15
+    python prepare_kaggle_data.py plant-disease \\
+        --src data/plant-disease-recognition-dataset
+    python train_disease_classifier.py \\
+        --data data/plant_disease_prepared/train \\
+        --val-data data/plant_disease_prepared/val \\
+        --epochs 15
 """
 import argparse
 import json
@@ -27,10 +27,13 @@ IMG_SIZE = 224
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--data", required=True, help="ImageFolder root")
+    ap.add_argument("--data", required=True, help="ImageFolder train root")
+    ap.add_argument("--val-data", default=None, help="ImageFolder val root (Kaggle Validation/)")
     ap.add_argument("--epochs", type=int, default=15)
     ap.add_argument("--imgsz", type=int, default=IMG_SIZE)
     ap.add_argument("--batch", type=int, default=64)
+    ap.add_argument("--workers", type=int, default=0,
+                    help="DataLoader workers (0 is safest on Windows)")
     args = ap.parse_args()
 
     ARTIFACTS.mkdir(exist_ok=True)
@@ -42,6 +45,8 @@ def main():
         epochs=args.epochs,
         imgsz=args.imgsz,
         batch=args.batch,
+        workers=args.workers,
+        val_dir=args.val_data,
     )
     # Class names encode "Crop___Condition"; the edge side splits on "___" to get
     # crop_type + disease/healthy. Healthy classes end in "healthy".

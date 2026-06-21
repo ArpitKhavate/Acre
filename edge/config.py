@@ -33,7 +33,13 @@ PEST_ONNX = ARTIFACTS_DIR / "pest.onnx"
 # --- Health score / LED ---------------------------------------------------
 # Plant turns the LED GREEN at or above this score, otherwise RED. (PRD 9.2)
 HEALTH_THRESHOLD = float(os.environ.get("ACRE_HEALTH_THRESHOLD", "70"))
-DETECTION_CONF = float(os.environ.get("ACRE_DETECTION_CONF", "0.35"))
+DETECTION_CONF = float(os.environ.get("ACRE_DETECTION_CONF", "0.55"))
+DETECTION_NMS_IOU = float(os.environ.get("ACRE_DETECTION_NMS_IOU", "0.40"))
+# Reject boxes that are tiny slivers or lack plant-like green (filters people/walls).
+DETECTION_MIN_BOX_AREA = float(os.environ.get("ACRE_DETECTION_MIN_BOX_AREA", "0.06"))
+DETECTION_MIN_GREEN_RATIO = float(os.environ.get("ACRE_DETECTION_MIN_GREEN_RATIO", "0.10"))
+# Classifiers only apply when confidence exceeds this (avoids random labels on background).
+CLASSIFIER_MIN_CONF = float(os.environ.get("ACRE_CLASSIFIER_MIN_CONF", "0.55"))
 
 # --- GPIO pins (BCM numbering) -------------------------------------------
 LED_RED_PIN = int(os.environ.get("ACRE_LED_RED_PIN", "17"))

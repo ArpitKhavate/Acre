@@ -1,9 +1,9 @@
 {
   "imgsz": 224,
   "names": [
+    "Thrips",
+    "Trialeurodes_vaporariorum",
     "aphids",
-    "whitefly",
-    "thrips",
-    "spider_mites"
+    "longlegged_spider_mite"
   ]
 }

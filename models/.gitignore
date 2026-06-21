@@ -1,5 +1,6 @@
 # Raw datasets and trained weights are large — never commit them.
-data/
+data/*
+!data/README.md
 artifacts/*.onnx
 *.pt
 runs/

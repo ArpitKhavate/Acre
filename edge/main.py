@@ -88,6 +88,13 @@ def scan_once(cam, detector, zones, motion, conn, sensor_unit=None) -> dict | No
 
     score = health_score.compute(result, sensor_anomaly_count=anomalies)
 
+    if score is None:
+        # No plants or weeds detected. Stand down.
+        lcd.show("Scanning...", zone_id)
+        aim.laser("OFF")
+        aim.set_angle(config.SERVO_CENTER_ANGLE)
+        return {"zone": zone_id, "type": "none"}
+
     # RGB LED: green = healthy, red = needs treatment. Buzzer only if wired.
     state = led.signal_for_score(score.score, buzz_on_red=config.BUZZER_ENABLED)
 

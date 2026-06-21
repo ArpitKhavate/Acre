@@ -8,7 +8,7 @@ Normalization (ImageNet mean/std) is baked into the documented preprocessing so
 the edge side (edge/detect.py) must apply the SAME transform. Keep these in sync.
 """
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 # ImageNet preprocessing — the edge side must mirror these exactly.
 MEAN = [0.485, 0.456, 0.406]
@@ -16,7 +16,8 @@ STD = [0.229, 0.224, 0.225]
 
 
 def train_classifier(data_dir: str, out_onnx: Path, epochs: int, imgsz: int,
-                     batch: int) -> List[str]:
+                     batch: int, workers: int = 0,
+                     val_dir: Optional[str] = None) -> List[str]:
     import torch
     import torch.nn as nn
     from torch.utils.data import DataLoader, random_split
@@ -38,15 +39,24 @@ def train_classifier(data_dir: str, out_onnx: Path, epochs: int, imgsz: int,
         transforms.Normalize(MEAN, STD),
     ])
 
-    full = datasets.ImageFolder(data_dir, transform=train_tf)
-    classes = full.classes
-    n_val = max(1, int(0.15 * len(full)))
-    n_train = len(full) - n_val
-    train_ds, val_ds = random_split(full, [n_train, n_val])
-    val_ds.dataset.transform = eval_tf  # type: ignore[attr-defined]
+    if val_dir:
+        train_ds = datasets.ImageFolder(data_dir, transform=train_tf)
+        val_ds = datasets.ImageFolder(val_dir, transform=eval_tf)
+        classes = train_ds.classes
+        if val_ds.classes != classes:
+            raise ValueError(
+                f"val_dir class names {val_ds.classes} != train {classes}"
+            )
+    else:
+        full = datasets.ImageFolder(data_dir, transform=train_tf)
+        classes = full.classes
+        n_val = max(1, int(0.15 * len(full)))
+        n_train = len(full) - n_val
+        train_ds, val_ds = random_split(full, [n_train, n_val])
+        val_ds.dataset.transform = eval_tf  # type: ignore[attr-defined]
 
-    train_dl = DataLoader(train_ds, batch_size=batch, shuffle=True, num_workers=4)
-    val_dl = DataLoader(val_ds, batch_size=batch, num_workers=4)
+    train_dl = DataLoader(train_ds, batch_size=batch, shuffle=True, num_workers=workers)
+    val_dl = DataLoader(val_ds, batch_size=batch, num_workers=workers)
 
     model = models.mobilenet_v3_small(weights="IMAGENET1K_V1")
     model.classifier[3] = nn.Linear(model.classifier[3].in_features, len(classes))

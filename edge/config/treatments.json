@@ -26,6 +26,21 @@
       "organic": "Hand-pull / hoe",
       "notes": "Spot-treat only; mulch to suppress regrowth"
     },
+    "Healthy": {
+      "pesticide": "None",
+      "organic": "Monitor weekly",
+      "notes": "Plant appears healthy — no treatment needed"
+    },
+    "Powdery": {
+      "pesticide": "Sulfur or potassium bicarbonate fungicide",
+      "organic": "Neem oil / milk spray (1:9 with water)",
+      "notes": "Improve airflow; avoid overhead watering; remove heavily infected leaves"
+    },
+    "Rust": {
+      "pesticide": "Chlorothalonil or myclobutanil",
+      "organic": "Copper fungicide; remove infected leaves promptly",
+      "notes": "Destroy infected foliage; avoid working plants when wet"
+    },
     "aphids": {
       "pesticide": "Insecticidal soap",
       "organic": "Neem oil / ladybugs",
@@ -42,6 +57,21 @@
       "notes": "Remove weeds nearby that host thrips"
     },
     "spider_mites": {
+      "pesticide": "Abamectin",
+      "organic": "Insecticidal soap / spray water",
+      "notes": "Increase humidity; avoid drought stress"
+    },
+    "Thrips": {
+      "pesticide": "Spinosad",
+      "organic": "Neem oil / predatory mites",
+      "notes": "Remove weeds nearby that host thrips"
+    },
+    "Trialeurodes_vaporariorum": {
+      "pesticide": "Pyrethrin",
+      "organic": "Yellow sticky traps + neem",
+      "notes": "Greenhouse whitefly — treat early morning"
+    },
+    "longlegged_spider_mite": {
       "pesticide": "Abamectin",
       "organic": "Insecticidal soap / spray water",
       "notes": "Increase humidity; avoid drought stress"

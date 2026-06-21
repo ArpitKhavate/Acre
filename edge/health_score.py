@@ -36,7 +36,10 @@ def _clamp(v, lo, hi):
 
 
 def compute(result: PlantResult, sensor_anomaly_count: int = 0,
-            threshold: float | None = None) -> ScoreResult:
+            threshold: float | None = None) -> ScoreResult | None:
+    if result.plant_box is None and not result.weed_boxes:
+        return None
+
     thr = config.HEALTH_THRESHOLD if threshold is None else threshold
 
     weed_pressure = 1.0 if result.weed_boxes else 0.0

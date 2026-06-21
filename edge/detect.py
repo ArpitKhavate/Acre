@@ -99,6 +99,53 @@ def _softmax(x: np.ndarray) -> np.ndarray:
     return e / e.sum()
 
 
+def _letterbox_blob(frame: np.ndarray, imgsz: int):
+    """Match Ultralytics training: scale + pad to square (not stretch)."""
+    import cv2
+
+    h, w = frame.shape[:2]
+    gain = min(imgsz / h, imgsz / w)
+    nw, nh = int(round(w * gain)), int(round(h * gain))
+    resized = cv2.resize(frame, (nw, nh), interpolation=cv2.INTER_LINEAR)
+    pad_w, pad_h = imgsz - nw, imgsz - nh
+    top, left = pad_h // 2, pad_w // 2
+    padded = cv2.copyMakeBorder(
+        resized, top, pad_h - top, left, pad_w - left,
+        cv2.BORDER_CONSTANT, value=(114, 114, 114),
+    )
+    blob = cv2.dnn.blobFromImage(padded, 1 / 255.0, (imgsz, imgsz), swapRB=True)
+    return blob, gain, left, top
+
+
+def _green_ratio(crop_bgr: np.ndarray) -> float:
+    """Fraction of pixels in plant-like HSV green range."""
+    if crop_bgr.size == 0:
+        return 0.0
+    import cv2
+
+    hsv = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, (25, 35, 35), (95, 255, 255))
+    return float(mask.mean()) / 255.0
+
+
+def _nms_boxes(boxes: List[Box], iou_thresh: float) -> List[Box]:
+    """Suppress overlapping YOLO proposals (stops clocks/UI clutter becoming 'weed')."""
+    if not boxes:
+        return []
+    import cv2
+
+    rects, confs = [], []
+    for b in boxes:
+        x, y, w, h = b.xywh
+        rects.append([int(x), int(y), int(w), int(h)])
+        confs.append(float(b.conf))
+    idxs = cv2.dnn.NMSBoxes(rects, confs, score_threshold=0.0, nms_threshold=iou_thresh)
+    if idxs is None or len(idxs) == 0:
+        return []
+    flat = idxs.flatten() if hasattr(idxs, "flatten") else idxs
+    return [boxes[int(i)] for i in flat]
+
+
 class Detector:
     def __init__(self):
         self.detector = _OnnxModel(config.DETECTOR_ONNX)
@@ -113,19 +160,41 @@ class Detector:
         self.pest_imgsz, self.pest_names = pest_labels or (224, [])
 
     # --- detector ---------------------------------------------------------
-    def _detect_boxes(self, frame: np.ndarray) -> List[Box]:
+    def _detect_boxes(self, frame: np.ndarray, conf_thresh: float = config.DETECTION_CONF) -> List[Box]:
         if not self.detector.ok:
             return []
-        import cv2
 
         h, w = frame.shape[:2]
-        blob = cv2.dnn.blobFromImage(
-            frame, 1 / 255.0, (self.det_imgsz, self.det_imgsz), swapRB=True
-        )
+        blob, gain, pad_x, pad_y = _letterbox_blob(frame, self.det_imgsz)
         out = self.detector.run(blob)
-        return self._parse_yolov8(out, w, h)
+        boxes = self._parse_yolov8(out, w, h, conf_thresh, gain, pad_x, pad_y)
+        boxes = _nms_boxes(boxes, config.DETECTION_NMS_IOU)
+        return self._filter_plant_boxes(frame, boxes)
 
-    def _parse_yolov8(self, out: np.ndarray, w: int, h: int) -> List[Box]:
+    def _filter_plant_boxes(self, frame: np.ndarray, boxes: List[Box]) -> List[Box]:
+        fh, fw = frame.shape[:2]
+        frame_area = fw * fh
+        kept: List[Box] = []
+        for b in boxes:
+            _, _, bw, bh = b.xywh
+            if (bw * bh) / frame_area < config.DETECTION_MIN_BOX_AREA:
+                continue
+            crop = self._crop(frame, b)
+            if _green_ratio(crop) < config.DETECTION_MIN_GREEN_RATIO:
+                continue
+            kept.append(b)
+        return kept
+
+    def _parse_yolov8(
+        self,
+        out: np.ndarray,
+        w: int,
+        h: int,
+        conf_thresh: float,
+        gain: float,
+        pad_x: float,
+        pad_y: float,
+    ) -> List[Box]:
         # YOLOv8 ONNX output: (1, 4+nc, num). Transpose to (num, 4+nc).
         preds = np.squeeze(out)
         if preds.ndim != 2:
@@ -134,18 +203,24 @@ class Detector:
             preds = preds.T
         nc = preds.shape[1] - 4
         boxes: List[Box] = []
-        sx, sy = w / self.det_imgsz, h / self.det_imgsz
         for row in preds:
             cx, cy, bw, bh = row[:4]
             scores = row[4:4 + nc]
             cid = int(np.argmax(scores))
             conf = float(scores[cid])
-            if conf < config.DETECTION_CONF:
+            if conf < conf_thresh:
                 continue
-            x = (cx - bw / 2) * sx
-            y = (cy - bh / 2) * sy
+            # Undo letterbox (coords are in imgsz space).
+            cx = (cx - pad_x) / gain
+            cy = (cy - pad_y) / gain
+            bw = bw / gain
+            bh = bh / gain
+            x = max(0, cx - bw / 2)
+            y = max(0, cy - bh / 2)
+            bw = min(bw, w - x)
+            bh = min(bh, h - y)
             name = self.det_names[cid] if cid < len(self.det_names) else str(cid)
-            boxes.append(Box(cid, name, conf, (int(x), int(y), int(bw * sx), int(bh * sy))))
+            boxes.append(Box(cid, name, conf, (int(x), int(y), int(bw), int(bh))))
         return boxes
 
     # --- classifiers ------------------------------------------------------
@@ -165,33 +240,44 @@ class Detector:
         return frame[y:y + h, x:x + w]
 
     # --- full per-plant inference ----------------------------------------
-    def analyze(self, frame: np.ndarray, motion: bool = False) -> PlantResult:
+    def analyze(self, frame: np.ndarray, motion: bool = False, conf_thresh: float = config.DETECTION_CONF) -> PlantResult:
         result = PlantResult()
-        boxes = self._detect_boxes(frame)
+        boxes = self._detect_boxes(frame, conf_thresh)
 
-        plant_boxes = [b for b in boxes if b.cls_name not in ("weed",)]
-        result.weed_boxes = [b for b in boxes if b.cls_name == "weed"]
+        plant_boxes = [b for b in boxes if b.cls_name != "weed"]
+        weed_boxes = [b for b in boxes if b.cls_name == "weed"]
 
-        # Pick the most confident plant box (fall back to whole frame).
-        if plant_boxes:
-            result.plant_box = max(plant_boxes, key=lambda b: b.conf)
+        # One best detection per frame — avoids clutter on walls/background.
+        best_plant = max(plant_boxes, key=lambda b: b.conf) if plant_boxes else None
+        best_weed = max(weed_boxes, key=lambda b: b.conf) if weed_boxes else None
+        if best_plant and best_weed:
+            if best_plant.conf >= best_weed.conf:
+                best_weed = None
+            else:
+                best_plant = None
+        if best_weed:
+            result.weed_boxes = [best_weed]
+        if best_plant:
+            result.plant_box = best_plant
+        if result.plant_box:
             crop = self._crop(frame, result.plant_box)
-        else:
-            crop = frame
+            dclass, dconf = self._classify(self.disease, self.dis_names, self.dis_imgsz, crop)
+            if dclass and dconf >= config.CLASSIFIER_MIN_CONF:
+                result.disease_class = dclass
+                result.disease_conf = dconf
+                result.crop_type = dclass.split("___")[0] if "___" in dclass else None
+                result.is_healthy = (
+                    dclass.lower() == "healthy"
+                    or dclass.lower().endswith("healthy")
+                    or dclass.lower().endswith("___healthy")
+                )
 
-        dclass, dconf = self._classify(self.disease, self.dis_names, self.dis_imgsz, crop)
-        if dclass:
-            result.disease_class = dclass
-            result.disease_conf = dconf
-            result.crop_type = dclass.split("___")[0] if "___" in dclass else None
-            result.is_healthy = dclass.lower().endswith("healthy")
-
-        # Pest classifier runs on motion-triggered crops (PRD 7.3).
-        if motion:
-            pclass, pconf = self._classify(self.pest, self.pest_names, self.pest_imgsz, crop)
-            if pclass:
-                result.pest_class = pclass
-                result.pest_conf = pconf
+            # Pest classifier runs on motion-triggered crops (PRD 7.3).
+            if motion:
+                pclass, pconf = self._classify(self.pest, self.pest_names, self.pest_imgsz, crop)
+                if pclass and pconf >= config.CLASSIFIER_MIN_CONF:
+                    result.pest_class = pclass
+                    result.pest_conf = pconf
 
         return result
 

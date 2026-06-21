@@ -17,3 +17,6 @@ edge/reports/
 
 # OS
 .DS_Store
+
+# Downloaded YOLO base weights (train scripts fetch locally)
+yolov8n.pt
