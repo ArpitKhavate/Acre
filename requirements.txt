@@ -10,3 +10,7 @@ requests==2.32.3                   # sync agent
 # Raspberry Pi only (install on the device, not on a dev laptop):
 # lgpio==0.2.2.0                   # red/green LED + buzzer on Pi GPIO
 # picamera2==0.3.18                # Pi Camera Module 3 capture
+
+mcp[cli]
+requests
+python-dotenv
