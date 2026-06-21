@@ -1,0 +1,258 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Typography */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  /* Brand — Organic Biophilic + precision tech */
+  --color-paper: #f3f5ee;
+  --color-paper-2: #e8ede0;
+  --color-forest: #0a2416;
+  --color-forest-900: #05130b;
+  --color-pine: #103a25;
+  --color-green: #15703e;
+  --color-green-600: #1c8049;
+  --color-leaf: #41d869;
+  --color-leaf-soft: #9fe0b3;
+  --color-gold: #e2a534;
+  --color-gold-deep: #c7861a;
+  --color-soil: #6b4f2a;
+  --color-card: #ffffff;
+
+  /* Telemetry / map semantics (mirror device RGB LED + zone health) */
+  --color-ok: #22c55e;
+  --color-warn: #f4a522;
+  --color-alert: #f05252;
+  --color-sync: #4b8ef0;
+
+  /* Ink */
+  --color-ink: #0a2416;
+  --color-muted: #41544a;
+  --color-line: rgba(10, 36, 22, 0.12);
+
+  --radius-card: 22px;
+}
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-leaf);
+  color: var(--color-forest);
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(12, 43, 27, 0.22);
+  border-radius: 99px;
+  border: 2px solid var(--color-paper);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(12, 43, 27, 0.4);
+}
+
+/* ---- Lenis ---- */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ---- Display type helpers ---- */
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+.text-balance {
+  text-wrap: balance;
+}
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* Mask-reveal lines for split text */
+.line-mask {
+  overflow: hidden;
+  display: block;
+}
+.word {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Grain texture for dark panels */
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+/* Fine dot grid overlay (dark panels) */
+.tech-grid {
+  background-image: radial-gradient(rgba(159, 224, 179, 0.16) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+/* Dot grid for light surfaces */
+.dot-grid {
+  background-image: radial-gradient(rgba(10, 36, 22, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Soft elevation for cards on light surfaces */
+.card-soft {
+  box-shadow:
+    0 1px 2px rgba(10, 36, 22, 0.05),
+    0 18px 40px -28px rgba(10, 36, 22, 0.35);
+}
+.card-hover {
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 2px 4px rgba(10, 36, 22, 0.06),
+    0 30px 60px -30px rgba(10, 36, 22, 0.45);
+}
+
+/* Live camera feed treatment */
+.camera-feed {
+  isolation: isolate;
+}
+.lens-vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 42%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+.scan-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* Progressive enhancement: visible before GSAP runs */
+@media (scripting: none) {
+  [data-reveal],
+  [data-split] .word,
+  [data-hero-fade] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Animated scan line (laser sweep motif) */
+@keyframes scan-sweep {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(110%);
+  }
+}
+.scan-line {
+  animation: scan-sweep 3.4s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+.pulse-ring {
+  animation: pulse-ring 2.6s ease-out infinite;
+}
+
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+.animate-float {
+  animation: float-soft 5s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 18s linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
