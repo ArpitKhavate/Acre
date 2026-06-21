@@ -56,7 +56,7 @@ export function Problem() {
           <div className="card-soft relative overflow-hidden rounded-card border border-line">
             <div className="relative aspect-[21/9] min-h-[220px]">
               <Image
-                src={IMAGES.cropClose}
+                src={IMAGES.rowWalk}
                 alt="Farmer walking between crop rows"
                 fill
                 sizes="(max-width: 768px) 100vw, 1152px"

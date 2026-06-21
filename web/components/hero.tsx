@@ -12,16 +12,18 @@ const STATS = [
 export function Hero() {
   return (
     <section id="top" data-hero className="relative min-h-[100svh] overflow-hidden">
-      {/* full-page farmland background */}
-      <Image
-        src={IMAGES.heroBg}
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover object-center"
-        aria-hidden
-      />
+      {/* full-page farmland background — subtle zoom on load via GSAP */}
+      <div className="absolute inset-0" data-hero-bg>
+        <Image
+          src={IMAGES.heroBg}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+          aria-hidden
+        />
+      </div>
 
       {/* scrim — keeps copy readable, field visible on the right */}
       <div

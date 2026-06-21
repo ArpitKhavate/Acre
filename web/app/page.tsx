@@ -3,6 +3,7 @@ import { Navbar } from '@/components/navbar'
 import { Hero } from '@/components/hero'
 import { Trust } from '@/components/trust'
 import { Problem } from '@/components/problem'
+import { TreeScrollStory } from '@/components/plants/tree-scroll-story'
 import { HowItWorks } from '@/components/how-it-works'
 import { Hardware } from '@/components/hardware'
 import { Dashboard } from '@/components/dashboard'
@@ -19,6 +20,7 @@ export default function Page() {
         <Hero />
         <Trust />
         <Problem />
+        <TreeScrollStory />
         <HowItWorks />
         <Hardware />
         <Dashboard />

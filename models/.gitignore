@@ -1,5 +1,0 @@
-# Raw datasets and trained weights are large — never commit them.
-data/
-artifacts/*.onnx
-*.pt
-runs/

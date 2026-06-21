@@ -1,34 +1,31 @@
-# Python
-__pycache__/
-*.pyc
-.venv/
-venv/
+# Dependencies
+node_modules/
+web/node_modules/
 
-# Local databases (edge SQLite + cloud SQLite dev default)
-*.db
-edge/captures/
+# Next.js
+.next/
+web/.next/
+out/
+build/
+*.tsbuildinfo
+web/next-env.d.ts
 
 # Env
 .env
 .env*.local
 
-# Node / Next.js
-/node_modules
-/web/node_modules
-/.pnp
-.pnp.js
-/.next/
-/web/.next/
-/out/
-/build
-*.pem
+# OS / editor
+.DS_Store
+.cursor/
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-*.tsbuildinfo
-next-env.d.ts
-/web/next-env.d.ts
+*.pem
 
-# OS
-.DS_Store
-.cursor/
+# Python (local tooling only — not part of this branch)
+__pycache__/
+*.pyc
+.venv/
+venv/

@@ -1,9 +1,0 @@
-{
-  "imgsz": 224,
-  "names": [
-    "aphids",
-    "whitefly",
-    "thrips",
-    "spider_mites"
-  ]
-}

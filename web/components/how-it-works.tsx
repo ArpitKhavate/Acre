@@ -36,9 +36,17 @@ const STEPS = [
   },
 ]
 
+/** SVG path through step icon centers (viewBox 0 0 1000 80). */
+const SIGNAL_PATH =
+  'M 50 40 C 180 40 220 40 250 40 S 450 40 500 40 S 700 40 750 40 S 900 40 950 40'
+
 export function HowItWorks() {
   return (
-    <section id="how" className="relative overflow-hidden px-5 py-24 text-paper md:px-8 md:py-32">
+    <section
+      id="how"
+      data-signal-loop
+      className="relative overflow-hidden px-5 py-24 text-paper md:px-8 md:py-32"
+    >
       <Image
         src={IMAGES.fieldRows}
         alt=""
@@ -69,22 +77,61 @@ export function HowItWorks() {
         </div>
 
         <div className="relative mt-16">
+          {/* signal chain — pulse travels on scroll */}
+          <svg
+            aria-hidden
+            className="pointer-events-none absolute inset-x-[4%] top-[34px] hidden h-20 lg:block"
+            preserveAspectRatio="none"
+            viewBox="0 0 1000 80"
+          >
+            <path
+              data-signal-path
+              d={SIGNAL_PATH}
+              fill="none"
+              stroke="rgba(159,224,179,0.35)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+            <circle
+              data-signal-pulse
+              r="7"
+              fill="#41d869"
+              opacity={0}
+              filter="url(#signal-glow)"
+            />
+            <defs>
+              <filter id="signal-glow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="3" result="b" />
+                <feMerge>
+                  <feMergeNode in="b" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+          </svg>
+
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5 lg:gap-5">
             {STEPS.map((s, i) => (
               <Reveal key={s.title} className="relative">
-                <div className="flex items-center gap-3">
-                  <span className="relative grid size-[68px] place-items-center rounded-2xl border border-white/15 bg-black/25 backdrop-blur-sm">
-                    <s.icon className="size-6 text-leaf" strokeWidth={1.8} />
-                    <span className="absolute -right-2 -top-2 grid size-6 place-items-center rounded-full bg-gold font-mono text-[11px] font-bold text-forest">
-                      {i + 1}
+                <div
+                  data-signal-step
+                  className="signal-step flex flex-col transition-[opacity,transform] duration-500"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="signal-step-icon relative grid size-[68px] place-items-center rounded-2xl border border-white/15 bg-black/25 backdrop-blur-sm transition-[border-color,box-shadow,transform] duration-500">
+                      <s.icon className="size-6 text-leaf" strokeWidth={1.8} />
+                      <span className="absolute -right-2 -top-2 grid size-6 place-items-center rounded-full bg-gold font-mono text-[11px] font-bold text-forest">
+                        {i + 1}
+                      </span>
                     </span>
-                  </span>
+                  </div>
+                  <h3 className="mt-5 font-display text-xl font-semibold">{s.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-paper/65">{s.body}</p>
+                  <p className="mt-3 font-mono text-[11px] tracking-wide text-leaf-soft">
+                    {s.detail}
+                  </p>
                 </div>
-                <h3 className="mt-5 font-display text-xl font-semibold">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-paper/65">{s.body}</p>
-                <p className="mt-3 font-mono text-[11px] tracking-wide text-leaf-soft">
-                  {s.detail}
-                </p>
               </Reveal>
             ))}
           </div>

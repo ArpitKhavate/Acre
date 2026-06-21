@@ -217,6 +217,101 @@ html.lenis body {
   animation: float-soft 5s ease-in-out infinite;
 }
 
+/* Plant SVG — gentle sway on leaves + whole plant bob */
+@keyframes leaf-sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+.plant-sway {
+  transform-origin: 50% 92%;
+  animation: float-soft 6s ease-in-out infinite;
+}
+.plant-leaf {
+  transform-origin: center;
+  animation: leaf-sway 3.5s ease-in-out infinite;
+}
+
+/* Tree — gentle wind */
+@keyframes tree-wind {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(0.4deg);
+  }
+  70% {
+    transform: rotate(-0.28deg);
+  }
+}
+[data-tree-sway] {
+  animation: tree-wind 14s ease-in-out infinite;
+}
+
+[data-tree-foliage] {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tree-branch-active {
+  stroke: #9fe0b3;
+  filter: drop-shadow(0 0 4px rgba(65, 216, 105, 0.55));
+}
+
+.tree-node-card {
+  transition:
+    border-color 0.45s ease,
+    box-shadow 0.45s ease,
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tree-node-active {
+  border-color: rgba(21, 112, 62, 0.35) !important;
+  box-shadow:
+    0 2px 6px rgba(10, 36, 22, 0.06),
+    0 24px 48px -24px rgba(21, 112, 62, 0.35),
+    0 0 0 1px rgba(65, 216, 105, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Signal loop — How it works */
+.signal-step {
+  opacity: 0.55;
+}
+.signal-step-active {
+  opacity: 1;
+}
+.signal-step-active .signal-step-icon {
+  border-color: rgba(65, 216, 105, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(65, 216, 105, 0.2),
+    0 0 24px rgba(65, 216, 105, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Metrics scan wipe */
+.stats-item {
+  opacity: 0.35;
+  transform: translateY(6px);
+}
+.stats-item-lit {
+  opacity: 1;
+  transform: translateY(0);
+}
+.stats-item-lit [data-counter] {
+  text-shadow: 0 0 32px rgba(65, 216, 105, 0.35);
+}
+
+[data-hero-bg] {
+  transform-origin: center center;
+  will-change: transform;
+}
+
 @keyframes spin-slow {
   to {
     transform: rotate(360deg);

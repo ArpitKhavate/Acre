@@ -1,2 +1,0 @@
-# Exported ONNX models land here (detector.onnx, disease.onnx, pest.onnx).
-# These are the only model artifacts copied to the Pi.

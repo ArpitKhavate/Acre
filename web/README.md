@@ -1,29 +1,24 @@
-# Acre — Web (the report the farmer sees)
+# Acre — Web UI
 
-Next.js dashboard (PRD section 10): a schematic farm map colored by health score,
-a pesticide table grouped by zone, and the Claude AI summary card. Reads entirely
-from the cloud API — no inference, no device coupling.
+Next.js marketing site and farmer dashboard: hero, product story, hardware overview,
+and a live dashboard panel (farm map, treatments table, AI summary) when the API is configured.
 
 ## Run
 
 ```bash
 npm install
-cp .env.example .env.local   # point NEXT_PUBLIC_ACRE_API at the cloud API
+cp .env.example .env.local   # optional: NEXT_PUBLIC_ACRE_API
 npm run dev                  # http://localhost:3000
 ```
 
-Make sure the cloud API is running and seeded first:
+## Page sections
 
-```bash
-# from repo root
-uvicorn cloud.app.main:app --port 8000
-python -m cloud.seed
-```
+1. **Hero** — full-bleed farm photography, product positioning
+2. **Problem / tree timeline** — scroll-driven scan pipeline story
+3. **How it works / hardware / platform** — device and architecture
+4. **Dashboard** — zone map, treatments, AI summary (requires API)
+5. **Metrics / CTA** — stats and signup
 
-## What's on the page
+## Design system
 
-1. **Farm map** — SVG from each zone's normalized `map_x`/`map_y`, colored
-   green (>=80) / amber (50-79) / red (<50). Logical layout, not satellite.
-2. **AI summary card** — farm health score + Claude-generated paragraph, with a
-   "Regenerate report" button that recomputes from the latest synced scans.
-3. **Treatments table** — per-zone findings matched to UC IPM treatments.
+See [design-system/MASTER.md](./design-system/MASTER.md) for colors, type, and spacing.
