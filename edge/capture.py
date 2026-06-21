@@ -23,7 +23,19 @@ class Camera:
         self._init_backend()
 
     def _init_backend(self):
-        # 1. picamera2 (Pi Camera Module 3)
+        # 0. Folder / file bridge (QNX camera tool output, or manual testing).
+        if config.FRAME_DIR or config.FRAME_FILE:
+            try:
+                import cv2  # noqa: F401
+
+                self.backend = "folder" if config.FRAME_DIR else "file"
+                print(f"[capture] reading frames from "
+                      f"{config.FRAME_DIR or config.FRAME_FILE}")
+                return
+            except Exception:
+                print("[capture] folder/file backend needs opencv; falling back.")
+
+        # 1. picamera2 (Pi Camera Module 3, Raspberry Pi OS)
         try:
             from picamera2 import Picamera2
 
@@ -59,6 +71,23 @@ class Camera:
 
     def read(self) -> np.ndarray:
         """Return a single BGR frame as an HxWx3 uint8 numpy array."""
+        if self.backend in ("folder", "file"):
+            import glob
+            import os
+
+            import cv2
+
+            path = config.FRAME_FILE
+            if self.backend == "folder":
+                files = (glob.glob(os.path.join(config.FRAME_DIR, "*.jpg"))
+                         + glob.glob(os.path.join(config.FRAME_DIR, "*.png")))
+                if not files:
+                    raise RuntimeError(f"no images in {config.FRAME_DIR}")
+                path = max(files, key=os.path.getmtime)  # newest frame
+            img = cv2.imread(path)
+            if img is None:
+                raise RuntimeError(f"could not read image: {path}")
+            return img
         if self.backend == "picamera2":
             rgb = self._picam.capture_array()
             return rgb[:, :, ::-1].copy()  # RGB -> BGR

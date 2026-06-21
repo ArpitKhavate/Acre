@@ -45,3 +45,10 @@ SYNC_BATCH_SIZE = int(os.environ.get("ACRE_SYNC_BATCH_SIZE", "50"))
 CAMERA_INDEX = int(os.environ.get("ACRE_CAMERA_INDEX", "0"))
 FRAME_WIDTH = int(os.environ.get("ACRE_FRAME_WIDTH", "640"))
 FRAME_HEIGHT = int(os.environ.get("ACRE_FRAME_HEIGHT", "480"))
+
+# QNX bridge / manual testing: read frames from a folder (newest image) or a
+# single file instead of a live camera. On QNX, point a camera capture tool at
+# ACRE_FRAME_DIR so this Python pipeline picks up each new JPEG. Leave unset to
+# use a live camera (picamera2 / OpenCV).
+FRAME_DIR = os.environ.get("ACRE_FRAME_DIR", "")
+FRAME_FILE = os.environ.get("ACRE_FRAME_FILE", "")

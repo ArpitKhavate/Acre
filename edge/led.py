@@ -34,6 +34,49 @@ class _StubBackend:
         pass
 
 
+class _QnxGpioBackend:
+    """QNX (Raspberry Pi 5) backend using the BSP's `gpio-rp1` utility.
+
+    Docs: gpio-rp1 set <pin> op   -> output
+          gpio-rp1 set <pin> dh   -> drive high (on)
+          gpio-rp1 set <pin> dl   -> drive low  (off)
+    Pins are BCM numbers, which is exactly what gpio-rp1 expects.
+    """
+
+    name = "qnx-gpio-rp1"
+
+    def __init__(self):
+        import subprocess
+
+        self._subprocess = subprocess
+        self._pins = {
+            "RED": config.LED_RED_PIN,
+            "GREEN": config.LED_GREEN_PIN,
+            "BLUE": config.LED_BLUE_PIN,
+        }
+        # Configure every pin as an output, initially off.
+        for pin in list(self._pins.values()) + [config.BUZZER_PIN]:
+            self._run(["set", str(pin), "op", "dl"])
+
+    def _run(self, args):
+        self._subprocess.run(["gpio-rp1", *args], check=False,
+                             capture_output=True)
+
+    def set(self, color: str) -> None:
+        for name, pin in self._pins.items():
+            self._run(["set", str(pin), "dh" if name == color else "dl"])
+
+    def beep(self, ms: int) -> None:
+        import time
+
+        self._run(["set", str(config.BUZZER_PIN), "dh"])
+        time.sleep(ms / 1000.0)
+        self._run(["set", str(config.BUZZER_PIN), "dl"])
+
+    def cleanup(self) -> None:
+        self.set("OFF")
+
+
 class _LgpioBackend:
     """Raspberry Pi (Linux) backend using the lgpio library."""
 
@@ -70,8 +113,18 @@ class _LgpioBackend:
 
 
 def _select_backend():
-    # QNX backend hook: detect QNX and return a QNX GPIO backend here once the
-    # BSP's GPIO interface is confirmed (see PRD section 7.4 / risk in 14).
+    import os
+    import shutil
+
+    # QNX (Pi 5): drive the LED through the BSP's gpio-rp1 utility.
+    is_qnx = getattr(os, "uname", lambda: None)() and os.uname().sysname == "QNX"
+    if (is_qnx or shutil.which("gpio-rp1")) and shutil.which("gpio-rp1"):
+        try:
+            return _QnxGpioBackend()
+        except Exception as exc:
+            print(f"[LED] QNX gpio-rp1 backend failed ({exc}); trying others.")
+
+    # Raspberry Pi OS (Linux): lgpio library.
     try:
         import lgpio  # noqa: F401
 
