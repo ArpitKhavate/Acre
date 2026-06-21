@@ -78,6 +78,42 @@ def sync_once(conn) -> tuple[bool, int]:
     return True, 0
 
 
+def report_url() -> str:
+    """Cloud endpoint that recomputes scores + AI summary for the web app."""
+    if config.CLOUD_REPORT_URL:
+        return config.CLOUD_REPORT_URL
+    base = config.BACKEND_URL
+    if base.endswith("/sync"):
+        base = base[: -len("/sync")]
+    return f"{base}/farms/{config.FARM_ID}/report"
+
+
+def trigger_report() -> bool:
+    """Ask the cloud to refresh the farm report so the web app updates.
+
+    Called after a sync (e.g. at the end of a run). Network-optional: a failure
+    just logs and returns False, keeping the device offline-first."""
+    import requests
+
+    try:
+        resp = requests.post(report_url(), timeout=10)
+        if resp.status_code == 200:
+            data = resp.json()
+            print(f"[sync] cloud report refreshed: "
+                  f"score={data.get('health_score')}/100")
+            return True
+        print(f"[sync] report trigger http_{resp.status_code}")
+    except Exception as exc:  # no network — fine, the raw data is already synced
+        print(f"[sync] report trigger skipped ({type(exc).__name__})")
+    return False
+
+
+def flush_and_report(conn) -> bool:
+    """Push any remaining rows, then trigger the cloud report. For end-of-run."""
+    sync_once(conn)
+    return trigger_report()
+
+
 def sync_loop(stop_event=None):
     conn = local_db.connect()
     print(f"[sync] loop started -> {config.BACKEND_URL} every {config.SYNC_INTERVAL_S}s")

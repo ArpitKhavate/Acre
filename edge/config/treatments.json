@@ -1,0 +1,50 @@
+{
+  "_source": "UC IPM (https://ipm.ucanr.edu/) — minimal demo table, expand per crop",
+  "treatments": {
+    "Tomato___Early_blight": {
+      "pesticide": "Chlorothalonil",
+      "organic": "Copper fungicide + remove lower leaves",
+      "notes": "Improve airflow; avoid overhead watering"
+    },
+    "Tomato___Late_blight": {
+      "pesticide": "Mancozeb",
+      "organic": "Copper fungicide",
+      "notes": "Remove and destroy infected plants promptly"
+    },
+    "Potato___Late_blight": {
+      "pesticide": "Mancozeb",
+      "organic": "Copper fungicide",
+      "notes": "Destroy infected foliage; hill soil over tubers"
+    },
+    "Pepper_bell___Bacterial_spot": {
+      "pesticide": "Copper + mancozeb",
+      "organic": "Copper spray",
+      "notes": "Use disease-free seed; avoid working plants when wet"
+    },
+    "weed": {
+      "pesticide": "Glyphosate (spot)",
+      "organic": "Hand-pull / hoe",
+      "notes": "Spot-treat only; mulch to suppress regrowth"
+    },
+    "aphids": {
+      "pesticide": "Insecticidal soap",
+      "organic": "Neem oil / ladybugs",
+      "notes": "Spray undersides of leaves; repeat weekly"
+    },
+    "whitefly": {
+      "pesticide": "Pyrethrin",
+      "organic": "Yellow sticky traps + neem",
+      "notes": "Treat early morning; monitor with traps"
+    },
+    "thrips": {
+      "pesticide": "Spinosad",
+      "organic": "Neem oil / predatory mites",
+      "notes": "Remove weeds nearby that host thrips"
+    },
+    "spider_mites": {
+      "pesticide": "Abamectin",
+      "organic": "Insecticidal soap / spray water",
+      "notes": "Increase humidity; avoid drought stress"
+    }
+  }
+}

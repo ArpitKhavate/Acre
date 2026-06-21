@@ -8,6 +8,9 @@ venv/
 *.db
 edge/captures/
 
+# Generated on-device reports
+edge/reports/
+
 # Env
 .env
 .env.local
