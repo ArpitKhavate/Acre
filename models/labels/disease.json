@@ -1,0 +1,12 @@
+{
+  "imgsz": 224,
+  "names": [
+    "Tomato___healthy",
+    "Tomato___Early_blight",
+    "Tomato___Late_blight",
+    "Potato___healthy",
+    "Potato___Late_blight",
+    "Pepper_bell___healthy",
+    "Pepper_bell___Bacterial_spot"
+  ]
+}

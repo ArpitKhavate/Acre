@@ -1,0 +1,12 @@
+# Acre EDGE (on-device) dependencies — Raspberry Pi 5 / QNX.
+# Inference runs fully offline here. Cloud deps live in cloud/requirements.txt;
+# off-device training deps live in models/requirements-train.txt.
+
+numpy>=1.26,<3
+opencv-contrib-python==4.10.0.84   # includes cv2.dnn + cv2.aruco
+onnxruntime==1.19.2                # ONNX inference (falls back to cv2.dnn)
+requests==2.32.3                   # sync agent
+
+# Raspberry Pi only (install on the device, not on a dev laptop):
+# lgpio==0.2.2.0                   # red/green LED + buzzer on Pi GPIO
+# picamera2==0.3.18                # Pi Camera Module 3 capture
