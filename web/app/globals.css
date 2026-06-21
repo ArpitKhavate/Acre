@@ -1,0 +1,65 @@
+:root {
+  --bg: #0f1411;
+  --panel: #18211b;
+  --border: #2a3a2e;
+  --text: #e7f0e9;
+  --muted: #91a596;
+  --green: #3fbf6f;
+  --amber: #e0a526;
+  --red: #e0533d;
+  --gray: #586a5d;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
+
+header.app { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+header.app h1 { font-size: 28px; margin: 0; letter-spacing: -0.02em; }
+header.app .tag { color: var(--muted); font-size: 13px; }
+
+.subtitle { color: var(--muted); margin: 0 0 28px; font-size: 14px; }
+
+.grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+@media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+}
+.card h2 { margin: 0 0 14px; font-size: 16px; font-weight: 600; }
+
+.score-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.dot.green { background: var(--green); }
+.dot.amber { background: var(--amber); }
+.dot.red { background: var(--red); }
+.dot.gray { background: var(--gray); }
+
+.farm-score { font-size: 44px; font-weight: 700; line-height: 1; }
+.farm-score small { font-size: 16px; color: var(--muted); font-weight: 400; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 500; }
+.pill { padding: 2px 8px; border-radius: 999px; font-size: 11px; background: #233027; }
+
+.summary { line-height: 1.6; font-size: 15px; }
+.btn {
+  background: var(--green); color: #07120b; border: 0; border-radius: 9px;
+  padding: 9px 14px; font-weight: 600; cursor: pointer; font-size: 13px;
+}
+.btn:disabled { opacity: 0.5; cursor: default; }
+.legend { display: flex; gap: 16px; color: var(--muted); font-size: 12px; margin-top: 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.error { color: var(--red); font-size: 13px; }
+.muted { color: var(--muted); }

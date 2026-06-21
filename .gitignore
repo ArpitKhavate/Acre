@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local databases (edge SQLite + cloud SQLite dev default)
+*.db
+edge/captures/
+
+# Env
+.env
+.env.local
+
+# OS
+.DS_Store
