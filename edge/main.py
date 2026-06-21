@@ -17,7 +17,7 @@ import argparse
 import threading
 import time
 
-from . import aim, capture, config, detect, health_score, lcd, led, local_db, rtc, sensors
+from . import aim, capture, config, detect, health_score, lcd, led, local_db, rtc, sensors, treatments
 from .aruco_zones import ZoneResolver
 from .sync_agent import flush_and_report, sync_loop
 
@@ -27,9 +27,7 @@ _TREATABLE = {"weed", "disease", "pest"}
 
 def treatment_id_for(score_result) -> str | None:
     """Map a finding to a treatments-table key (resolved fully in the cloud)."""
-    if score_result.type == "healthy":
-        return None
-    return f"{score_result.class_name.lower().replace('___', '_')}_treat"
+    return treatments.treatment_id_for(score_result.type, score_result.class_name)
 
 
 def _target_cx(result, frame_width: int) -> float:
@@ -100,6 +98,8 @@ def scan_once(cam, detector, zones, motion, conn, sensor_unit=None) -> dict | No
 
     # On-device display: zone + 0-100 health score + the finding (PRD 6).
     finding = "healthy" if score.type == "healthy" else f"{score.type}:{score.class_name}"
+    if score.pest_class:
+        finding += f" pest:{score.pest_class}"
     lcd.show_score(zone_id, score.score, finding)
 
     # Perception -> action: center the pan servo on the target and hold the

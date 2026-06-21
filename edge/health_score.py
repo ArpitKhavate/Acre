@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from . import config
+from . import treatments as trt
 from .detect import PlantResult
 
 
@@ -29,6 +30,9 @@ class ScoreResult:
     crop_type: Optional[str]
     confidence: float
     factors: dict
+    pest_class: Optional[str] = None
+    pest_conf: float = 0.0
+    pesticide: Optional[str] = None
 
 
 def _clamp(v, lo, hi):
@@ -79,4 +83,7 @@ def compute(result: PlantResult, sensor_anomaly_count: int = 0,
             "sensor_penalty": round(sensor_pen, 1),
             "threshold": thr,
         },
+        pest_class=result.pest_class,
+        pest_conf=round(float(result.pest_conf), 3) if result.pest_class else 0.0,
+        pesticide=trt.primary_pesticide(ftype, fclass or ""),
     )

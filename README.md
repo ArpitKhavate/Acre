@@ -49,6 +49,7 @@ flowchart LR
 pip install -r requirements.txt
 python -m edge.main --once          # single scan: prints finding + LED state
 python -m edge.main                 # continuous handheld scan loop
+python scripts/webcam_farm_demo.py    # webcam + press F → live health report in browser
 ```
 
 On a dev laptop with no camera/models it uses synthetic frames, disables missing

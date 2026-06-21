@@ -64,6 +64,7 @@ class _OnnxModel:
         if not self.ok:
             print(f"[detect] model missing: {onnx_path.name} (stage disabled)")
             return
+        ort_err: Optional[Exception] = None
         try:
             import onnxruntime as ort
 
@@ -72,13 +73,26 @@ class _OnnxModel:
             )
             self._inp = self._sess.get_inputs()[0].name
             self.backend = "onnxruntime"
-        except Exception:
+            return
+        except Exception as exc:
+            ort_err = exc
+        try:
             import cv2
 
             self._net = cv2.dnn.readNetFromONNX(str(onnx_path))
             self.backend = "opencv"
+            return
+        except Exception as cv_exc:
+            print(
+                f"[detect] cannot load {onnx_path.name}: "
+                f"onnxruntime ({ort_err}); opencv dnn ({cv_exc}) — stage disabled"
+            )
+            self.ok = False
+            self.backend = None
 
     def run(self, blob: np.ndarray) -> np.ndarray:
+        if not self.ok or self.backend is None:
+            raise RuntimeError("model not loaded")
         if self.backend == "onnxruntime":
             return self._sess.run(None, {self._inp: blob})[0]
         self._net.setInput(blob)
@@ -240,7 +254,13 @@ class Detector:
         return frame[y:y + h, x:x + w]
 
     # --- full per-plant inference ----------------------------------------
-    def analyze(self, frame: np.ndarray, motion: bool = False, conf_thresh: float = config.DETECTION_CONF) -> PlantResult:
+    def analyze(
+        self,
+        frame: np.ndarray,
+        motion: bool = False,
+        classify_pests: bool = True,
+        conf_thresh: float = config.DETECTION_CONF,
+    ) -> PlantResult:
         result = PlantResult()
         boxes = self._detect_boxes(frame, conf_thresh)
 
@@ -251,10 +271,11 @@ class Detector:
         best_plant = max(plant_boxes, key=lambda b: b.conf) if plant_boxes else None
         best_weed = max(weed_boxes, key=lambda b: b.conf) if weed_boxes else None
         if best_plant and best_weed:
-            if best_plant.conf >= best_weed.conf:
-                best_weed = None
-            else:
+            margin = config.DETECTION_WEED_MARGIN
+            if best_weed.conf >= best_plant.conf + margin:
                 best_plant = None
+            else:
+                best_weed = None
         if best_weed:
             result.weed_boxes = [best_weed]
         if best_plant:
@@ -272,12 +293,19 @@ class Detector:
                     or dclass.lower().endswith("___healthy")
                 )
 
-            # Pest classifier runs on motion-triggered crops (PRD 7.3).
-            if motion:
+            # Pest classifier on every plant crop (motion still used for MOG2 elsewhere).
+            if classify_pests or motion:
                 pclass, pconf = self._classify(self.pest, self.pest_names, self.pest_imgsz, crop)
                 if pclass and pconf >= config.CLASSIFIER_MIN_CONF:
-                    result.pest_class = pclass
-                    result.pest_conf = pconf
+                    # Diseased leaf texture can fool the pest model — require a clear win.
+                    disease_wins = (
+                        not result.is_healthy
+                        and result.disease_conf >= config.CLASSIFIER_MIN_CONF
+                        and pconf <= result.disease_conf + 0.12
+                    )
+                    if not disease_wins:
+                        result.pest_class = pclass
+                        result.pest_conf = pconf
 
         return result
 

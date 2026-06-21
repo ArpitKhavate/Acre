@@ -38,6 +38,8 @@ DETECTION_NMS_IOU = float(os.environ.get("ACRE_DETECTION_NMS_IOU", "0.40"))
 # Reject boxes that are tiny slivers or lack plant-like green (filters people/walls).
 DETECTION_MIN_BOX_AREA = float(os.environ.get("ACRE_DETECTION_MIN_BOX_AREA", "0.06"))
 DETECTION_MIN_GREEN_RATIO = float(os.environ.get("ACRE_DETECTION_MIN_GREEN_RATIO", "0.10"))
+# Weed must beat crop by this margin to avoid false weed labels on plants.
+DETECTION_WEED_MARGIN = float(os.environ.get("ACRE_DETECTION_WEED_MARGIN", "0.08"))
 # Classifiers only apply when confidence exceeds this (avoids random labels on background).
 CLASSIFIER_MIN_CONF = float(os.environ.get("ACRE_CLASSIFIER_MIN_CONF", "0.55"))
 

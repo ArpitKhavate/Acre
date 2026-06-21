@@ -39,6 +39,10 @@ TREATMENTS = [
      "Remove weeds nearby that host thrips", "UC IPM"),
     ("spider_mites_treat", "spider_mites", "Abamectin", "Insecticidal soap / spray water",
      "Increase humidity; avoid drought stress", "UC IPM"),
+    ("powdery_treat", "Powdery", "Sulfur or potassium bicarbonate fungicide",
+     "Neem oil / milk spray (1:9 with water)", "Improve airflow; avoid overhead watering", "UC IPM"),
+    ("rust_treat", "Rust", "Chlorothalonil or myclobutanil",
+     "Copper fungicide; remove infected leaves promptly", "Destroy infected foliage", "UC IPM"),
 ]
 
 DEMO_DETECTIONS = [  # (class_name, type, crop, base_score, treatment_id)

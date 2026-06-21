@@ -107,13 +107,21 @@ Files needed on the Pi:
 If OpenCV/ONNX Runtime are **not** on QNX yet, the LED/LCD/sync loop still runs;
 detection stays disabled until those libs are installed (see QNX_SETUP §7a).
 
-### 3. Python deps on QNX
+### 3. Python deps on QNX (`apk`, not `pip`)
+
+QNX uses **apk** — do not run `pip install` on the Pi for these deps.
 
 ```sh
-python3 -m pip install numpy requests
-# When available on QNX:
-# python3 -m pip install opencv-python onnxruntime
+sudo apk update
+python3 -c "import numpy; print('numpy', numpy.__version__)" 2>/dev/null || echo "numpy missing"
+sudo apk list --available | grep -iE 'numpy|requests'
+sudo apk add python3-dev python3-wheel
+# if your image lists them:
+# sudo apk add py3-numpy py3-requests
 ```
+
+Many QSTI images already include NumPy (see `~/projects/READMEs/python_numpy.md`).
+OpenCV/ONNX are separate QNX ports (QNX_SETUP §7a).
 
 ### 4. Camera → still images (QNX path)
 

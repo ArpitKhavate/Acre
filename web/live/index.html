@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Acre — Field Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0c100e;
+      --surface: #141a16;
+      --surface2: #1b241f;
+      --border: #2a352e;
+      --text: #eef4ef;
+      --muted: #8fa193;
+      --green: #45c47a;
+      --green-dim: #1a3d2a;
+      --amber: #e4a82e;
+      --red: #e85d4a;
+      --serif: "Instrument Serif", Georgia, serif;
+      --sans: "DM Sans", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    .shell {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    .logo {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--green-dim);
+      border: 1px solid #2d5c3f;
+      display: grid; place-items: center;
+      font-weight: 700; color: var(--green); font-size: 14px;
+    }
+    .brand h1 {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+    }
+    .brand span { color: var(--muted); font-size: 13px; }
+
+    .waiting {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+    .waiting kbd {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    .report { display: none; animation: rise 0.5s ease-out; }
+    .report.visible { display: block; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 32px;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    @media (max-width: 640px) { .hero { grid-template-columns: 1fr; } }
+
+    .score-ring {
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      border: 3px solid var(--border);
+      position: relative;
+    }
+    .score-ring.healthy { border-color: var(--green); }
+    .score-ring.attention { border-color: var(--amber); }
+    .score-ring.critical { border-color: var(--red); }
+    .score-num {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .score-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .hero h2 {
+      font-family: var(--serif);
+      font-size: 32px;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+    .hero .meta { color: var(--muted); font-size: 14px; }
+
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+    .summary-card h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .summary-card p {
+      font-size: 17px;
+      line-height: 1.65;
+      color: #d8e5db;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 640px) { .stats { grid-template-columns: 1fr; } }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .stat .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .stat .value {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .stat .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .table-wrap h3 {
+      padding: 16px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 20px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+    tr:last-child td { border-bottom: 0; }
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .pill.healthy { background: var(--green-dim); color: var(--green); }
+    .pill.weed { background: #3d1f1a; color: var(--red); }
+    .pill.disease { background: #3d3018; color: var(--amber); }
+    .pill.pest { background: #3d1f1a; color: var(--red); }
+
+    .timestamp {
+      margin-top: 24px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="brand">
+      <div class="logo">A</div>
+      <div>
+        <h1>Acre</h1>
+        <span>Field health report</span>
+      </div>
+    </header>
+
+    <div id="waiting" class="waiting">
+      <p style="font-size:18px;color:var(--text);margin-bottom:12px;">Waiting for scan data…</p>
+      <p>Point the webcam at plants, then press <kbd>F</kbd> in the camera window to generate the report.</p>
+    </div>
+
+    <div id="report" class="report">
+      <section class="hero">
+        <div>
+          <div id="scoreRing" class="score-ring healthy">
+            <div style="text-align:center">
+              <div id="farmScore" class="score-num">—</div>
+              <div class="score-label">Farm health</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h2 id="headline">Session summary</h2>
+          <p class="meta" id="meta">—</p>
+        </div>
+      </section>
+
+      <section class="summary-card">
+        <h3>AI summary</h3>
+        <p id="aiSummary">—</p>
+      </section>
+
+      <section class="stats">
+        <div class="stat">
+          <div class="label">Priority pesticide</div>
+          <div class="value" id="topPesticide">—</div>
+          <div class="sub" id="pesticideSub">Most needed across scans</div>
+        </div>
+        <div class="stat">
+          <div class="label">Most common pest</div>
+          <div class="value" id="topPest">—</div>
+          <div class="sub" id="pestSub">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Plants scanned</div>
+          <div class="value" id="plantCount">—</div>
+          <div class="sub" id="scanSub">—</div>
+        </div>
+      </section>
+
+      <section class="table-wrap">
+        <h3>Recent findings</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Finding</th>
+              <th>Health</th>
+              <th>Pest</th>
+              <th>Treatment</th>
+            </tr>
+          </thead>
+          <tbody id="findingsBody"></tbody>
+        </table>
+      </section>
+
+      <p class="timestamp" id="timestamp"></p>
+    </div>
+  </div>
+
+  <script>
+    const API = window.location.origin;
+
+    function pillClass(type) {
+      if (type === "healthy") return "healthy";
+      if (type === "weed") return "weed";
+      if (type === "pest") return "pest";
+      return "disease";
+    }
+
+    function render(data) {
+      document.getElementById("waiting").style.display = "none";
+      const el = document.getElementById("report");
+      el.classList.add("visible");
+
+      const ring = document.getElementById("scoreRing");
+      ring.className = "score-ring " + (data.status || "healthy");
+
+      document.getElementById("farmScore").textContent = Math.round(data.farm_health);
+      document.getElementById("headline").textContent =
+        data.farm_health >= 70 ? "Field looks healthy" :
+        data.farm_health >= 50 ? "Some areas need attention" : "Treatment recommended";
+      document.getElementById("meta").textContent =
+        `${data.scan_count} scans · ${data.plant_count} plants · ${data.weed_count} weeds flagged`;
+
+      document.getElementById("aiSummary").textContent = data.ai_summary;
+      document.getElementById("topPesticide").textContent = data.top_pesticide;
+      document.getElementById("topPest").textContent = data.top_pest;
+      document.getElementById("pestSub").textContent =
+        data.top_pest_count ? `Seen in ${data.top_pest_count} scan(s)` : "No pest signals";
+      document.getElementById("plantCount").textContent = data.plant_count;
+      document.getElementById("scanSub").textContent = `${data.scan_count} total scans`;
+
+      const tbody = document.getElementById("findingsBody");
+      tbody.innerHTML = "";
+      (data.findings || []).slice().reverse().forEach((f) => {
+        const tr = document.createElement("tr");
+        const label = f.type === "healthy" ? "Healthy plant" : `${f.type}: ${f.class_name}`;
+        tr.innerHTML = `
+          <td><span class="pill ${pillClass(f.type)}">${label}</span></td>
+          <td>${f.health_score ?? "—"}/100</td>
+          <td>${f.pest_class || "none"}</td>
+          <td>${f.primary_pesticide || "—"}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("timestamp").textContent =
+        "Generated " + new Date(data.generated_at).toLocaleString();
+    }
+
+    async function poll() {
+      try {
+        const res = await fetch(API + "/api/report/latest");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ready) render(data);
+        }
+      } catch (_) {}
+    }
+
+    poll();
+    setInterval(poll, 800);
+  </script>
+</body>
+</html>

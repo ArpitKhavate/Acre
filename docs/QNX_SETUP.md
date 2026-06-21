@@ -104,12 +104,18 @@ utility, which is why LCD updates only happen when the displayed text changes.
 ## Step 6 — Python + the light dependencies
 
 Acre's edge code is Python. Confirm Python is on your QNX image (`python3
---version`). The "light" parts (scoring, LED, laser, servo, LCD, database, sync)
-need only the standard library plus `numpy` and `requests`:
+--version`). Install dependencies with **apk** (not pip):
 
 ```sh
-python3 -m pip install numpy requests
+sudo apk update
+python3 -c "import numpy" 2>/dev/null && echo "numpy already installed"
+sudo apk list --available | grep -i requests
+# sudo apk add py3-requests   # if available on your image
 ```
+
+The "light" parts (scoring, LED, laser, servo, LCD, database, sync) need
+`numpy` and `requests`. NumPy may already be on the QSTI image; see
+`~/projects/READMEs/python_numpy.md` if you need to add it.
 
 Then run the full backends self-check (fires no laser):
 
