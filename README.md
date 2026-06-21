@@ -10,6 +10,8 @@ Pi 5 / QNX board; the cloud is reporting-only (map, pesticide list, AI summary).
 
 See the full spec in [docs/Acre_PRD.md](docs/Acre_PRD.md).
 
+**QNX Pi + laptop demo (friend's setup):** [docs/DEMO_RUNBOOK.md](docs/DEMO_RUNBOOK.md)
+
 ## Architecture: local does the thinking, cloud does the reporting
 
 ```mermaid
